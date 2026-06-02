@@ -16,11 +16,14 @@ import {
   Check,
   Wind,
   LayoutDashboard,
+  Bell,
+  Cake,
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useApp } from "@/contexts/AppContext"
-import { formatAge } from "@/utils/age"
+import { formatAge, isBirthday } from "@/utils/age"
 import { cn } from "@/lib/utils"
+import { ReminderScheduler } from "./ReminderScheduler"
 import { InstallBanner } from "./InstallBanner"
 import { UpdateBanner } from "./UpdateBanner"
 import { ThemeToggle } from "@/components/ThemeToggle"
@@ -36,6 +39,7 @@ const FEATURE_NAV = [
   { path: "/feeding", labelKey: "nav.feeding", icon: Timer },
   { path: "/weight", labelKey: "nav.weight", icon: Scale },
   { path: "/diaper", labelKey: "nav.diaper", icon: Droplets },
+  { path: "/reminders", labelKey: "nav.reminders", icon: Bell },
   { path: "/white-noise", labelKey: "nav.whiteNoise", icon: Wind },
 ]
 
@@ -64,6 +68,7 @@ export const Shell = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="flex h-dvh flex-col bg-background text-foreground">
+      <ReminderScheduler />
       {/* Install / update banners */}
       <UpdateBanner />
       <InstallBanner />
@@ -90,6 +95,9 @@ export const Shell = ({ children }: { children: React.ReactNode }) => {
               <span className="truncate text-xs text-muted-foreground">
                 {activeBaby.name} · {formatAge(activeBaby.dob)}
               </span>
+              {isBirthday(activeBaby.dob) && (
+                <Cake className="h-3 w-3 shrink-0 text-pink-500" />
+              )}
               <ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" />
             </button>
           ) : (
@@ -173,8 +181,11 @@ export const Shell = ({ children }: { children: React.ReactNode }) => {
                   <BabyAvatar name={baby.name} sex={baby.sex} size="sm" />
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-medium">{baby.name}</div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       {formatAge(baby.dob)}
+                      {isBirthday(baby.dob) && (
+                        <Cake className="h-3 w-3 shrink-0 text-pink-500" />
+                      )}
                     </div>
                   </div>
                   {activeBaby?.id === baby.id && (

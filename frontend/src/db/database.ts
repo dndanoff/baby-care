@@ -5,6 +5,7 @@ import type {
   FeedingSession,
   WeightEntry,
   DiaperEntry,
+  Reminder,
 } from "@/types"
 
 class BabyCareDB extends Dexie {
@@ -13,6 +14,7 @@ class BabyCareDB extends Dexie {
   feedingSessions!: Table<FeedingSession, string>
   weightEntries!: Table<WeightEntry, string>
   diaperEntries!: Table<DiaperEntry, string>
+  reminders!: Table<Reminder, string>
 
   constructor() {
     super("BabyCareDB")
@@ -22,6 +24,14 @@ class BabyCareDB extends Dexie {
       feedingSessions: "id, babyId, startTime",
       weightEntries: "id, babyId, dateTime",
       diaperEntries: "id, babyId, dateTime",
+    })
+    this.version(2).stores({
+      babies: "id, name, createdAt",
+      milestones: "id, babyId, ageRange, completed, createdAt",
+      feedingSessions: "id, babyId, startTime",
+      weightEntries: "id, babyId, dateTime",
+      diaperEntries: "id, babyId, dateTime",
+      reminders: "id, babyId, enabled, createdAt",
     })
   }
 }

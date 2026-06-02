@@ -17,18 +17,41 @@ export const getAgeRange = (dob: string): AgeRange => {
   return "12-24m"
 }
 
+export const isBirthday = (dob: string): boolean => {
+  const birth = new Date(dob)
+  const now = new Date()
+  return birth.getMonth() === now.getMonth() && birth.getDate() === now.getDate()
+}
+
 export const formatAge = (dob: string): string => {
-  const months = getAgeInMonths(dob)
-  if (months < 1) {
-    const days = Math.floor(
-      (Date.now() - new Date(dob).getTime()) / (1000 * 60 * 60 * 24)
-    )
-    return `${days} day${days !== 1 ? "s" : ""} old`
+  const birth = new Date(dob)
+  const today = new Date()
+
+  let years = today.getFullYear() - birth.getFullYear()
+  let months = today.getMonth() - birth.getMonth()
+  let days = today.getDate() - birth.getDate()
+
+  if (days < 0) {
+    months--
+    // Days in the month before today's month
+    const daysInPrevMonth = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      0
+    ).getDate()
+    days += daysInPrevMonth
   }
-  if (months < 24) return `${months} month${months !== 1 ? "s" : ""} old`
-  const years = Math.floor(months / 12)
-  const rem = months % 12
-  return rem > 0
-    ? `${years}y ${rem}m old`
-    : `${years} year${years !== 1 ? "s" : ""} old`
+
+  if (months < 0) {
+    years--
+    months += 12
+  }
+
+  const parts: string[] = []
+  if (years > 0) parts.push(`${years} year${years !== 1 ? "s" : ""}`)
+  if (months > 0) parts.push(`${months} month${months !== 1 ? "s" : ""}`)
+  if (days > 0) parts.push(`${days} day${days !== 1 ? "s" : ""}`)
+
+  if (parts.length === 0) return "newborn"
+  return parts.join(" ") + " old"
 }

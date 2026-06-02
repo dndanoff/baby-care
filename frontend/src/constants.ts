@@ -15,6 +15,19 @@ export const CONSTANTS = {
     PAGE_SIZE: 10,
   },
 
+  // ─── Reminders ───────────────────────────────────────────────────────────
+  reminders: {
+    INTERVAL_OPTIONS: [
+      { label: "30m", minutes: 30 },
+      { label: "1h", minutes: 60 },
+      { label: "2h", minutes: 120 },
+      { label: "3h", minutes: 180 },
+      { label: "4h", minutes: 240 },
+      { label: "6h", minutes: 360 },
+      { label: "8h", minutes: 480 },
+    ] as const,
+  },
+
   // ─── Feeding reminders ───────────────────────────────────────────────────
   feeding: {
     /**

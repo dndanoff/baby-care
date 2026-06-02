@@ -6,6 +6,7 @@ import {
   Check,
   Baby as BabyIcon,
   ChevronRight,
+  Cake,
 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { config } from "@/config"
@@ -19,7 +20,7 @@ import {
   validatePositiveInt,
 } from "@/utils/validate"
 import type { Baby, Sex } from "@/types"
-import { formatAge } from "@/utils/age"
+import { formatAge, isBirthday } from "@/utils/age"
 import { toISODateString } from "@/utils/format"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -205,8 +206,11 @@ const Babies = () => {
                     </Badge>
                   )}
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   {formatAge(baby.dob)}
+                  {isBirthday(baby.dob) && (
+                    <Cake className="h-3.5 w-3.5 shrink-0 text-pink-500" />
+                  )}
                 </div>
               </div>
             </button>

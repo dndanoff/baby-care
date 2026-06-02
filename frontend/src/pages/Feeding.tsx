@@ -1,25 +1,14 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { useLiveQuery } from "dexie-react-hooks"
-import {
-  Play,
-  Square,
-  RotateCcw,
-  Bell,
-  BellOff,
-  Baby,
-  AlarmClock,
-  Trash2,
-} from "lucide-react"
+import { Play, Square, RotateCcw, Baby, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { feedingRepository } from "@/db/repositories"
 import { useApp } from "@/contexts/AppContext"
 import { useFeedingTimer } from "@/hooks/useFeedingTimer"
 import { useNavigationGuard } from "@/hooks/useNavigationGuard"
 import { formatDuration, formatFeedingGap } from "@/utils/format"
-import { getAgeInMonths } from "@/utils/age"
 import { cn } from "@/lib/utils"
 import { CONSTANTS } from "@/constants"
-import { config } from "@/config"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -37,14 +26,6 @@ import { LoadMore } from "@/components/common/LoadMore"
 import type { FeedingSession, FeedingType } from "@/types"
 
 const { PAGE_SIZE } = CONSTANTS.pagination
-const { REMINDER_OPTIONS, REMINDER_THRESHOLDS, REMINDER_DEFAULT_MINUTES } =
-  CONSTANTS.feeding
-
-const recommendedReminderMinutes = (dob: string): number => {
-  const months = getAgeInMonths(dob)
-  const match = REMINDER_THRESHOLDS.find((t) => months < t.maxAgeMonths)
-  return match?.minutes ?? REMINDER_DEFAULT_MINUTES
-}
 
 const Feeding = () => {
   const { t } = useTranslation()
@@ -54,18 +35,7 @@ const Feeding = () => {
   const [feedingType, setFeedingType] = useState<FeedingType | undefined>(
     undefined
   )
-  const [reminderMinutes, setReminderMinutes] = useState(0)
-  const [notifPermission, setNotifPermission] =
-    useState<NotificationPermission>(() =>
-      "Notification" in window ? Notification.permission : "default"
-    )
   const [visibleCount, setVisibleCount] = useState<number>(PAGE_SIZE)
-
-  const reminderTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const recommended = activeBaby
-    ? recommendedReminderMinutes(activeBaby.dob)
-    : 0
 
   const feedingTypeOptions: {
     value: FeedingType | undefined
@@ -91,46 +61,15 @@ const Feeding = () => {
   const hasMore = allSessions ? visibleCount < allSessions.length : false
 
   useEffect(() => {
-    return () => {
-      if (reminderTimeoutRef.current) clearTimeout(reminderTimeoutRef.current)
-    }
-  }, [])
-
-  useEffect(() => {
     setVisibleCount(PAGE_SIZE) // eslint-disable-line react-hooks/set-state-in-effect
   }, [activeBaby?.id])
 
   const handleStop = async () => {
-    const saved = await stop(feedingType)
-    if (saved && reminderMinutes > 0) {
-      if (reminderTimeoutRef.current) clearTimeout(reminderTimeoutRef.current)
-      reminderTimeoutRef.current = setTimeout(
-        () => {
-          notify(
-            t("feeding.reminderNotifTitle"),
-            t("feeding.reminderNotifBody", { hours: reminderMinutes / 60 })
-          )
-        },
-        reminderMinutes * 60 * 1000
-      )
-    }
+    await stop(feedingType)
   }
 
   const handleReset = () => {
     reset()
-    if (reminderTimeoutRef.current) clearTimeout(reminderTimeoutRef.current)
-  }
-
-  const notify = (title: string, body: string) => {
-    if ("Notification" in window && Notification.permission === "granted") {
-      new Notification(title, { body, icon: config.VITE_NOTIFICATION_ICON })
-    }
-  }
-
-  const requestNotifPermission = async () => {
-    if (!("Notification" in window)) return
-    const result = await Notification.requestPermission()
-    setNotifPermission(result)
   }
 
   if (!activeBaby) {
@@ -195,75 +134,6 @@ const Feeding = () => {
           onChange={setFeedingType}
           columns={3}
         />
-      </div>
-
-      {/* Reminder settings */}
-      <div className="mb-6 rounded-lg border p-3">
-        <div className="mb-2 flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs font-medium">
-            <AlarmClock className="h-3.5 w-3.5" />
-            {t("feeding.nextFeedingReminder")}
-          </div>
-          {notifPermission === "default" && (
-            <button
-              onClick={requestNotifPermission}
-              className="flex items-center gap-1 text-xs text-primary"
-            >
-              <Bell className="h-3 w-3" />
-              {t("feeding.enable")}
-            </button>
-          )}
-          {notifPermission === "granted" && (
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Bell className="h-3 w-3" /> {t("feeding.enabled")}
-            </span>
-          )}
-          {notifPermission === "denied" && (
-            <span className="flex items-center gap-1 text-xs text-destructive">
-              <BellOff className="h-3 w-3" /> {t("feeding.blocked")}
-            </span>
-          )}
-        </div>
-        <div className="flex gap-1.5">
-          {REMINDER_OPTIONS.map((opt) => {
-            const isSelected = reminderMinutes === opt.minutes
-            const isRecommended =
-              opt.minutes !== 0 && opt.minutes === recommended
-            const label =
-              opt.minutes === 0 ? t("feeding.reminderOff") : opt.label
-            return (
-              <button
-                key={opt.minutes}
-                onClick={() => setReminderMinutes(opt.minutes)}
-                className={cn(
-                  "relative flex-1 rounded border py-1 text-xs font-medium transition-colors",
-                  isSelected
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : isRecommended
-                      ? "border-primary/40 bg-primary/5 text-primary hover:bg-primary/10"
-                      : "border-border text-muted-foreground hover:bg-muted"
-                )}
-              >
-                {label}
-                {isRecommended && !isSelected && (
-                  <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-primary px-1 py-px text-[9px] leading-none font-semibold text-primary-foreground">
-                    {t("feeding.rec")}
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-        {reminderMinutes > 0 && notifPermission === "default" && (
-          <p className="mt-1.5 text-xs text-amber-600">
-            {t("feeding.enableNotifications")}
-          </p>
-        )}
-        {reminderMinutes > 0 && notifPermission === "denied" && (
-          <p className="mt-1.5 text-xs text-destructive">
-            {t("feeding.notificationsBlocked")}
-          </p>
-        )}
       </div>
 
       {/* Navigation guard dialog */}

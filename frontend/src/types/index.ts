@@ -62,3 +62,14 @@ export interface DiaperEntry {
 export interface AppSettings {
   activeBabyId?: string
 }
+
+export interface Reminder {
+  id: string
+  babyId: string
+  text: string
+  intervalMinutes: number
+  repeating: boolean
+  enabled: boolean
+  lastFiredAt?: string
+  createdAt: string
+}
