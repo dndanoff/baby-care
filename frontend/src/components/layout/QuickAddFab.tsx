@@ -48,7 +48,7 @@ export const QuickAddFab = () => {
 
       {/* Popup panel */}
       {open && (
-        <div className="fixed right-4 bottom-20 z-50 w-52 rounded-xl border bg-popover shadow-lg sm:bottom-6">
+        <div className="fixed top-32 right-4 z-50 w-52 rounded-xl border bg-popover shadow-lg">
           {step === "menu" ? (
             <div className="space-y-1 p-2">
               <button
@@ -116,7 +116,7 @@ export const QuickAddFab = () => {
       <button
         onClick={() => (open ? close() : setOpen(true))}
         className={cn(
-          "fixed right-4 bottom-20 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-all sm:bottom-6",
+          "fixed top-16 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-all",
           open
             ? "bg-muted text-foreground hover:bg-muted/80"
             : "bg-primary text-primary-foreground hover:bg-primary/90"
