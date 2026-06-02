@@ -15,6 +15,7 @@ import Diaper from "@/pages/Diaper"
 import Settings from "@/pages/Settings"
 import WhiteNoise from "@/pages/WhiteNoise"
 import Reminders from "@/pages/Reminders"
+import NotFound from "@/pages/NotFound"
 import { ThemeProvider } from "@/contexts/ThemeContext.tsx"
 import { AppProvider } from "@/contexts/AppContext.tsx"
 
@@ -34,7 +35,7 @@ const router = createBrowserRouter([
       { path: "settings", element: <Settings /> },
       { path: "white-noise", element: <WhiteNoise /> },
       { path: "reminders", element: <Reminders /> },
-      { path: "*", element: <Navigate to="/babies" replace /> },
+      { path: "*", element: <NotFound /> },
     ],
   },
 ])
