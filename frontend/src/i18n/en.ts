@@ -229,14 +229,24 @@ const en = {
     title: "Reminders",
     selectBaby: "Select a baby to manage reminders.",
     notificationsEnable: "Enable",
-    notificationsEnabled: "Notifications enabled",
-    notificationsBlocked:
-      "Notifications are blocked. Reset them in Chrome: address bar → lock icon → Notifications → Allow.",
-    notificationsDefault: "Enable notifications to receive reminders.",
+    notificationsEnabled: "Notifications on",
+    notificationsBlocked: "Notifications blocked",
+    notificationsBlockedHelp:
+      "To re-enable: click the lock icon in the address bar → Notifications → Allow, then reload.",
+    notificationsDefault: "Notifications are off",
+    notificationsDefaultHelp:
+      "Reminders fire as browser notifications. Tap Enable and accept the popup that appears near the address bar.",
+    notificationsPrompted:
+      "A browser popup should have appeared near the address bar. If you missed it, tap Enable again.",
+    notificationsInfo:
+      "Notifications only fire while this app is open in your browser.",
     addReminder: "Add reminder",
     textPlaceholder: "e.g. Feed baby",
     textRequired: "Reminder text is required.",
+    intervalTooShort: "Set at least 1 minute.",
     interval: "Remind every",
+    hours: "h",
+    minutes: "min",
     repeat: "Repeat",
     once: "Once",
     add: "Add",

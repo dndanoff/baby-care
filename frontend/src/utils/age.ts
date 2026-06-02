@@ -20,7 +20,9 @@ export const getAgeRange = (dob: string): AgeRange => {
 export const isBirthday = (dob: string): boolean => {
   const birth = new Date(dob)
   const now = new Date()
-  return birth.getMonth() === now.getMonth() && birth.getDate() === now.getDate()
+  return (
+    birth.getMonth() === now.getMonth() && birth.getDate() === now.getDate()
+  )
 }
 
 export const formatAge = (dob: string): string => {
