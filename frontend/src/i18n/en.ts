@@ -269,6 +269,7 @@ const en = {
   },
   installBanner: {
     text: "Install {{appName}} for offline use",
+    iosText: "Tap the Share button then 'Add to Home Screen' to install",
     install: "Install",
     dismiss: "Dismiss",
   },

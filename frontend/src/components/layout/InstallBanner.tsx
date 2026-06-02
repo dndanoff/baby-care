@@ -1,34 +1,50 @@
 import { useEffect, useState } from "react"
-import { Download, X } from "lucide-react"
+import { Download, Share2, X } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { config } from "@/config"
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt(): Promise<void>
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>
-}
+import {
+  getPendingInstallPrompt,
+  clearPendingInstallPrompt,
+  onInstallPromptReady,
+  isIOS,
+  isInStandaloneMode,
+} from "@/lib/pwa"
 
 export const InstallBanner = () => {
   const { t } = useTranslation()
-  const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null)
+  const [hasAndroidPrompt, setHasAndroidPrompt] = useState(
+    () => !!getPendingInstallPrompt()
+  )
   const [dismissed, setDismissed] = useState(false)
 
-  useEffect(() => {
-    const handler = (e: Event) => {
-      e.preventDefault()
-      setDeferredPrompt(e as BeforeInstallPromptEvent)
-    }
-    window.addEventListener("beforeinstallprompt", handler)
-    return () => window.removeEventListener("beforeinstallprompt", handler)
-  }, [])
+  useEffect(() => onInstallPromptReady(() => setHasAndroidPrompt(true)), [])
 
-  if (!deferredPrompt || dismissed) return null
+  if (dismissed || isInStandaloneMode()) return null
+
+  if (isIOS()) {
+    return (
+      <div className="flex items-center gap-2 border-b bg-primary/5 px-4 py-2 text-sm">
+        <Share2 className="h-4 w-4 shrink-0 text-primary" />
+        <span className="flex-1 text-xs">{t("installBanner.iosText")}</span>
+        <button
+          onClick={() => setDismissed(true)}
+          className="rounded p-1 text-muted-foreground hover:bg-muted"
+          aria-label={t("installBanner.dismiss")}
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    )
+  }
+
+  if (!hasAndroidPrompt) return null
 
   const install = async () => {
-    await deferredPrompt.prompt()
-    const { outcome } = await deferredPrompt.userChoice
-    if (outcome === "accepted") setDeferredPrompt(null)
+    const prompt = getPendingInstallPrompt()
+    if (!prompt) return
+    await prompt.prompt()
+    const { outcome } = await prompt.userChoice
+    if (outcome === "accepted") clearPendingInstallPrompt()
     setDismissed(true)
   }
 
