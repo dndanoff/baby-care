@@ -10,7 +10,15 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "prompt",
-      includeAssets: ["favicon.svg", "pwa-192.png", "pwa-512.png"],
+      includeAssets: [
+        "favicon.svg",
+        "favicon.ico",
+        "pwa-64x64.png",
+        "pwa-192x192.png",
+        "pwa-512x512.png",
+        "maskable-icon-512x512.png",
+        "apple-touch-icon-180x180.png",
+      ],
       manifest: {
         name: "BabyCare",
         short_name: "BabyCare",
@@ -25,19 +33,25 @@ export default defineConfig({
         categories: ["health", "lifestyle", "utilities"],
         icons: [
           {
-            src: "pwa-192.png",
+            src: "pwa-64x64.png",
+            sizes: "64x64",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "pwa-192x192.png",
             sizes: "192x192",
             type: "image/png",
             purpose: "any",
           },
           {
-            src: "pwa-512.png",
+            src: "pwa-512x512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "any",
           },
           {
-            src: "pwa-512.png",
+            src: "maskable-icon-512x512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable",
@@ -47,6 +61,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         navigateFallback: "index.html",
+        clientsClaim: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
