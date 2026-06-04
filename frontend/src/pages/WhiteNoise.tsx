@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { Volume1, Volume2, VolumeX } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
+import { useWakeLock } from "@/hooks/useWakeLock"
 
 const fillWhiteNoise = (buffer: AudioBuffer) => {
   for (let c = 0; c < buffer.numberOfChannels; c++) {
@@ -16,6 +17,8 @@ const WhiteNoise = () => {
   const { t } = useTranslation()
   const [playing, setPlaying] = useState(false)
   const [volume, setVolume] = useState(0.6)
+
+  useWakeLock(playing)
 
   const ctxRef = useRef<AudioContext | null>(null)
   const sourceRef = useRef<AudioBufferSourceNode | null>(null)

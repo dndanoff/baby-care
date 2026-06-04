@@ -6,6 +6,7 @@ import { feedingRepository } from "@/db/repositories"
 import { useApp } from "@/contexts/AppContext"
 import { useFeedingTimer } from "@/hooks/useFeedingTimer"
 import { useNavigationGuard } from "@/hooks/useNavigationGuard"
+import { useWakeLock } from "@/hooks/useWakeLock"
 import { formatDuration, formatFeedingGap } from "@/utils/format"
 import { cn } from "@/lib/utils"
 import { CONSTANTS } from "@/constants"
@@ -33,6 +34,7 @@ const Feeding = () => {
   const { running, paused, elapsed, start, pause, stop, reset } =
     useFeedingTimer(activeBaby)
   const guard = useNavigationGuard(running || paused)
+  useWakeLock(running)
   const [feedingType, setFeedingType] = useState<FeedingType | undefined>(
     undefined
   )
