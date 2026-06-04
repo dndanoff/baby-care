@@ -40,7 +40,12 @@ const FEATURE_NAV = [
   { path: "/weight", labelKey: "nav.weight", icon: Scale },
   { path: "/diaper", labelKey: "nav.diaper", icon: Droplets },
   { path: "/reminders", labelKey: "nav.reminders", icon: Bell },
-  { path: "/white-noise", labelKey: "nav.whiteNoise", icon: Wind },
+  {
+    path: "/white-noise",
+    labelKey: "nav.whiteNoise",
+    shortLabelKey: "nav.whiteNoiseShort",
+    icon: Wind,
+  },
 ]
 
 const ALL_PAGES = [
@@ -287,8 +292,8 @@ export const Shell = ({ children }: { children: React.ReactNode }) => {
       {/* Page content — leaves space for bottom nav on mobile */}
       <main className="flex-1 overflow-y-auto pb-16 sm:pb-0">{children}</main>
 
-      {/* Desktop footer */}
-      <footer className="hidden shrink-0 items-center justify-center border-t py-2 sm:flex">
+      {/* Footer — visible on all screen sizes; mb-16 clears the fixed mobile bottom nav */}
+      <footer className="mb-16 flex shrink-0 items-center justify-center border-t py-2 sm:mb-0">
         <a
           href="https://ko-fi.com/yourpage"
           target="_blank"
@@ -303,7 +308,7 @@ export const Shell = ({ children }: { children: React.ReactNode }) => {
 
       {/* Bottom nav (mobile only) — tracking features only, no Children tab */}
       <nav className="fixed right-0 bottom-0 left-0 z-30 flex h-16 border-t bg-background sm:hidden">
-        {FEATURE_NAV.map(({ path, labelKey, icon: Icon }) => (
+        {FEATURE_NAV.map(({ path, labelKey, shortLabelKey, icon: Icon }) => (
           <NavLink
             key={path}
             to={path}
@@ -315,7 +320,7 @@ export const Shell = ({ children }: { children: React.ReactNode }) => {
             }
           >
             <Icon className="h-5 w-5" />
-            {t(labelKey)}
+            {t(shortLabelKey ?? labelKey)}
           </NavLink>
         ))}
       </nav>

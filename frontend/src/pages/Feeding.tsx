@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useLiveQuery } from "dexie-react-hooks"
-import { Play, Square, RotateCcw, Baby, Trash2 } from "lucide-react"
+import { Play, Pause, Square, RotateCcw, Baby, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { feedingRepository } from "@/db/repositories"
 import { useApp } from "@/contexts/AppContext"
@@ -30,8 +30,9 @@ const { PAGE_SIZE } = CONSTANTS.pagination
 const Feeding = () => {
   const { t } = useTranslation()
   const { activeBaby } = useApp()
-  const { running, elapsed, start, stop, reset } = useFeedingTimer(activeBaby)
-  const guard = useNavigationGuard(running || elapsed > 0)
+  const { running, paused, elapsed, start, pause, stop, reset } =
+    useFeedingTimer(activeBaby)
+  const guard = useNavigationGuard(running || paused)
   const [feedingType, setFeedingType] = useState<FeedingType | undefined>(
     undefined
   )
@@ -84,18 +85,30 @@ const Feeding = () => {
       <div className="mb-6 flex flex-col items-center">
         <div
           className={cn(
-            "mb-4 flex h-36 w-36 items-center justify-center rounded-full border-4 transition-colors",
-            running ? "border-primary" : "border-border"
+            "mb-1 flex h-36 w-36 items-center justify-center rounded-full border-4 transition-colors",
+            running
+              ? "border-primary"
+              : paused
+                ? "border-amber-500"
+                : "border-border"
           )}
         >
           <span className="font-mono text-3xl font-bold tabular-nums">
             {formatDuration(elapsed)}
           </span>
         </div>
+        <span
+          className={cn(
+            "mb-3 text-xs font-medium transition-opacity",
+            paused ? "text-amber-500 opacity-100" : "opacity-0"
+          )}
+        >
+          {t("feeding.pause")}
+        </span>
       </div>
 
       {/* Controls */}
-      <div className="mb-8 flex justify-center gap-4">
+      <div className="mb-8 flex items-center justify-center gap-4">
         <button
           onClick={handleReset}
           className="flex h-12 w-12 items-center justify-center rounded-full border text-muted-foreground hover:bg-muted"
@@ -103,24 +116,36 @@ const Feeding = () => {
         >
           <RotateCcw className="h-5 w-5" />
         </button>
-        {!running ? (
+
+        {running ? (
           <button
-            onClick={start}
+            onClick={pause}
             className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md hover:bg-primary/90"
-            aria-label={t("feeding.start")}
+            aria-label={t("feeding.pause")}
           >
-            <Play className="h-6 w-6 translate-x-0.5" />
+            <Pause className="h-6 w-6" />
           </button>
         ) : (
           <button
+            onClick={start}
+            className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md hover:bg-primary/90"
+            aria-label={paused ? t("feeding.resume") : t("feeding.start")}
+          >
+            <Play className="h-6 w-6 translate-x-0.5" />
+          </button>
+        )}
+
+        {running || paused ? (
+          <button
             onClick={handleStop}
-            className="text-destructive-foreground flex h-16 w-16 items-center justify-center rounded-full bg-destructive shadow-md hover:bg-destructive/90"
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-destructive/40 text-destructive hover:bg-destructive/10"
             aria-label={t("feeding.stop")}
           >
             <Square className="h-5 w-5" />
           </button>
+        ) : (
+          <div className="h-12 w-12" />
         )}
-        <div className="h-12 w-12" />
       </div>
 
       {/* Feeding type */}

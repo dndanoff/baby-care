@@ -4,12 +4,15 @@ import type { Baby, FeedingType } from "@/types"
 
 export const useFeedingTimer = (activeBaby: Baby | null) => {
   const [running, setRunning] = useState(false)
+  const [paused, setPaused] = useState(false)
   const [elapsed, setElapsed] = useState(0)
   const [sessionStart, setSessionStart] = useState<string | null>(null)
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  // Wall-clock time when the timer was started, used to compute elapsed accurately
+  // Wall-clock time when the current segment started (reset on each resume)
   const startedAtRef = useRef<number | null>(null)
+  // Elapsed seconds accumulated from all completed segments before the current one
+  const accumulatedRef = useRef<number>(0)
 
   const clearTimer = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current)
@@ -19,30 +22,52 @@ export const useFeedingTimer = (activeBaby: Baby | null) => {
 
   const tick = useCallback(() => {
     if (startedAtRef.current !== null) {
-      setElapsed(Math.floor((Date.now() - startedAtRef.current) / 1000))
+      setElapsed(
+        accumulatedRef.current +
+          Math.floor((Date.now() - startedAtRef.current) / 1000)
+      )
     }
   }, [])
 
   const start = () => {
     if (running) return
-    setRunning(true)
-    const now = new Date()
+    const now = Date.now()
     if (!sessionStart) {
-      setSessionStart(now.toISOString())
-      startedAtRef.current = now.getTime()
+      setSessionStart(new Date(now).toISOString())
+      accumulatedRef.current = 0
     }
+    startedAtRef.current = now
+    setRunning(true)
+    setPaused(false)
     intervalRef.current = setInterval(tick, 1000)
   }
 
-  const stop = async (feedingType?: FeedingType): Promise<boolean> => {
-    if (!running) return false
+  const pause = () => {
+    if (!running) return
     clearTimer()
+    if (startedAtRef.current !== null) {
+      accumulatedRef.current += Math.floor(
+        (Date.now() - startedAtRef.current) / 1000
+      )
+      setElapsed(accumulatedRef.current)
+    }
+    startedAtRef.current = null
     setRunning(false)
+    setPaused(true)
+  }
+
+  const stop = async (feedingType?: FeedingType): Promise<boolean> => {
+    if (!running && !paused) return false
+    clearTimer()
+    const finalElapsed =
+      running && startedAtRef.current !== null
+        ? accumulatedRef.current +
+          Math.floor((Date.now() - startedAtRef.current) / 1000)
+        : accumulatedRef.current
+    setRunning(false)
+    setPaused(false)
 
     if (activeBaby && sessionStart) {
-      const finalElapsed = startedAtRef.current
-        ? Math.floor((Date.now() - startedAtRef.current) / 1000)
-        : elapsed
       await feedingRepository.add({
         babyId: activeBaby.id,
         startTime: sessionStart,
@@ -53,6 +78,7 @@ export const useFeedingTimer = (activeBaby: Baby | null) => {
       setSessionStart(null)
       setElapsed(0)
       startedAtRef.current = null
+      accumulatedRef.current = 0
       return true
     }
     return false
@@ -61,10 +87,12 @@ export const useFeedingTimer = (activeBaby: Baby | null) => {
   const reset = () => {
     clearTimer()
     setRunning(false)
+    setPaused(false)
     setElapsed(0)
     setSessionStart(null)
     startedAtRef.current = null
+    accumulatedRef.current = 0
   }
 
-  return { running, elapsed, start, stop, reset }
+  return { running, paused, elapsed, start, pause, stop, reset }
 }

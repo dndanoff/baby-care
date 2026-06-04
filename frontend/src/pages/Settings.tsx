@@ -286,6 +286,25 @@ const Settings = () => {
         </Button>
       </section>
 
+      {/* Support */}
+      <section className="mb-6">
+        <SectionHeader className="mb-3">{t("settings.support")}</SectionHeader>
+        <a
+          href="https://ko-fi.com/yourpage"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex w-full items-center gap-3 rounded-lg border border-dashed px-4 py-3 text-sm font-medium transition-colors hover:border-primary/50 hover:bg-muted hover:text-primary"
+        >
+          <span className="text-base leading-none">🍼</span>
+          <div className="min-w-0 flex-1">
+            <div>{t("shell.buyMeADiaper")}</div>
+            <div className="text-xs font-normal text-muted-foreground">
+              {t("settings.supportTagline")}
+            </div>
+          </div>
+        </a>
+      </section>
+
       {/* Danger zone */}
       <section>
         <SectionHeader className="mb-3" variant="danger">
