@@ -171,6 +171,9 @@ const en = {
     lastDiaper: "Last diaper",
     lastWeight: "Last weight",
     noData: "Not logged yet",
+    weightProgress: "Weight progress",
+    feedingsPerDay: "Feedings per day (last 14 days)",
+    feedingTimeDistribution: "Feeding time distribution (30-min slots)",
   },
   quickAdd: {
     label: "Quick add",

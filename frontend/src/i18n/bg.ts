@@ -170,6 +170,9 @@ const bg = {
     lastDiaper: "Последна пелена",
     lastWeight: "Последно тегло",
     noData: "Все още не е записано",
+    weightProgress: "Ръст на теглото",
+    feedingsPerDay: "Хранения на ден (последните 14 дни)",
+    feedingTimeDistribution: "Разпределение на хранения по часове (на 30 мин)",
   },
   quickAdd: {
     label: "Бързо добавяне",

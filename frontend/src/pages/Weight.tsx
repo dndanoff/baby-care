@@ -2,15 +2,6 @@ import { useState } from "react"
 import { useLiveQuery } from "dexie-react-hooks"
 import { Scale, Baby, Plus, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts"
 import { weightRepository } from "@/db/repositories"
 import { useApp } from "@/contexts/AppContext"
 import {
@@ -36,35 +27,10 @@ import { FormSection } from "@/components/common/FormSection"
 import { SectionHeader } from "@/components/common/SectionHeader"
 import { Time24Input } from "@/components/common/Time24Input"
 import { LoadMore } from "@/components/common/LoadMore"
+import { WeightProgressChart } from "@/components/charts/WeightProgressChart"
 import type { WeightEntry } from "@/types"
 
 const { PAGE_SIZE } = CONSTANTS.pagination
-
-type ChartPoint = { label: string; weight: number; dateTime: string }
-
-const WeightTooltip = ({
-  active,
-  payload,
-}: {
-  active?: boolean
-  payload?: Array<{ payload: ChartPoint }>
-}) => {
-  if (!active || !payload?.length) return null
-  const { dateTime, weight } = payload[0].payload
-  return (
-    <div className="rounded-md border bg-popover px-3 py-2 text-xs shadow-md">
-      <p className="text-muted-foreground">
-        {new Date(dateTime).toLocaleString([], {
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
-      </p>
-      <p className="mt-0.5 font-semibold">{formatWeightGrams(weight)}</p>
-    </div>
-  )
-}
 
 const Weight = () => {
   const { t } = useTranslation()
@@ -86,17 +52,6 @@ const Weight = () => {
   )
 
   const visibleEntries = allEntries?.slice(0, visibleCount)
-
-  const chartData: ChartPoint[] = allEntries
-    ? [...allEntries].reverse().map((e) => ({
-        label: new Date(e.dateTime).toLocaleDateString([], {
-          month: "short",
-          day: "numeric",
-        }),
-        weight: e.weightGrams,
-        dateTime: e.dateTime,
-      }))
-    : []
   const hasMore = allEntries ? visibleCount < allEntries.length : false
 
   const addEntry = async (): Promise<boolean> => {
@@ -200,46 +155,10 @@ const Weight = () => {
         </Button>
       </FormSection>
 
-      {chartData.length >= 2 && (
+      {allEntries && allEntries.length >= 2 && (
         <div className="mb-6 rounded-lg border p-4">
           <SectionHeader className="mb-3">{t("weight.progress")}</SectionHeader>
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart
-              data={chartData}
-              margin={{ top: 4, right: 8, bottom: 0, left: -8 }}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="var(--border)"
-                vertical={false}
-              />
-              <XAxis
-                dataKey="label"
-                tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
-                axisLine={false}
-                tickLine={false}
-                interval="preserveStartEnd"
-              />
-              <YAxis
-                tickFormatter={(v: number) => `${(v / 1000).toFixed(1)}`}
-                tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
-                axisLine={false}
-                tickLine={false}
-                width={32}
-                domain={["auto", "auto"]}
-                unit=" kg"
-              />
-              <Tooltip content={<WeightTooltip />} />
-              <Line
-                type="monotone"
-                dataKey="weight"
-                stroke="var(--primary)"
-                strokeWidth={2}
-                dot={{ r: 3, fill: "var(--primary)", strokeWidth: 0 }}
-                activeDot={{ r: 5, fill: "var(--primary)" }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <WeightProgressChart entries={allEntries} />
         </div>
       )}
 
